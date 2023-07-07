@@ -86,6 +86,46 @@ hwe_prob = hardy[which(hardy$P < 0.0000009),]
 hwe_prob
 
 
+### Population Stratification and Association Testing
+You usually should not analyze data from European-Americans, Mexican-Americans and Italians together even if you control for population stratification. They can be analyzed separately and the data combined using meta-analysis.
+
+
+plink --file GWAS_clean4 --genome --cluster --mds-plot 10
+
+
+Although the association analysis will be performed on the entire data set, only this a subset of SNPs which are not in LD will be used to construct PCA and MDS components. We generated 10 components here.
+
+
+Examining λ can aid in determining how many PC components should be included in the analysis. If there is no population stratification or other biases, then λ should equal 1 or ~1.
+
+
+plink --file GWAS_clean4 --genome --cluster --pca 10 header
+
+
+Eigenvectors are written to plink.eigenvec, and top eigenvalues are written to plink.eigenval. The 'header' modifier adds a header line to the .eigenvec file(s).
+
+
+And then find out what λ is when we adjust for the first component:
+plink --file GWAS_clean4 --pheno pheno.txt --pheno-name Aff --covar plink.eigenvec -- covar-name PC1 --logistic --adjust --out PC1
+
+
+And the first and second components:
+plink --file GWAS_clean4 --pheno pheno.txt --pheno-name Aff --covar plink.eigenvec -- covar-name PC1-PC2 --logistic --adjust --out PC1-PC2
+
+
+and so forth for all 10 components in the .log file completing the table:
+
+
+Unadj PC1   PC1-2 PC1-3 PC1-4 PC1-5 PC1-6 PC1-7 PC1-8 PC1-9 PC1-10
+1.121 1.085 1.026 1.033 1.040 1.050 1.043 1.021 1.036 1.043 1.051
+
+
+It is best to include two components in the analysis. Since we are analyzing three unique populations inclusion of PCs did not adequately control for substructure. If you compare the QQ plots below you can see that for this dataset the most significant SNPs were changed minimally when we adjusted for substructure but some of the moderately significant SNPs lambda became less significant after adjustment. However, in some situations the p-values can become smaller.
+
+Why would you not want to include in your analysis individuals from different ethnic backgrounds even if you control for population substructure?
+
+
+Firstly, you may not be able to adequately control for population substructure. Secondly, even if within the different populations the same genes are involved, for common variants LD structure can vary between populations, e.g., the tagSNPs in the different populations can have different allele frequencies, therefore the functional variant will not be tagged equally well in all populations and power can be reduced. It is also possible that different variants are associated, but for common variants, which are very old, usually this is not the cause. If a study involves individuals of different ancestry analysis can be performed separately and the results can be combined via meta-analysis. Studying individuals of different ancestry can be highly beneficial to fine map loci.
 
 
 
