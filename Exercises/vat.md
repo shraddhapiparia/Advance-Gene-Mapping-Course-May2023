@@ -35,10 +35,19 @@ vtools show table variant
 
 
 • maf: Minor allele frequency
-• Add calculated variant level statistics to fields, which can be shown by commands vtools show fields and
+• Add calculated variant level statistics to fields, which can be shown by commands 
+
+vtools show fields
+
 vtools show table variant
 
 
+# Minor allele frequencies (MAFs)
+
+In previous steps, we calculated MAFs for each variant site before and after filtering on genotype read depth. Below is a summary of the results:
+
+
+vtools output variant chr pos maf mafGD10 --header --limit 20
 
 ## Variant annotation
 
@@ -48,7 +57,7 @@ vtools execute ANNOVAR geneanno
 vtools output variant chr pos ref alt mut_type --limit 20 --header
 
 
-#### Data Quality Control (QC) and Variant Selection
+## Data Quality Control (QC) and Variant Selection
 ##### Ti/Tv ratio evaluations
 
 vtools_report trans_ratio variant -n num
@@ -80,21 +89,32 @@ The command above selects variant sites that are either nonsynonymous (by condit
 # Association Tests for Quantitative Traits
 
 ## View phenotype data
+
+
 vtools show samples --limit 5
+
 
 ## Create sub-projects for association analysis with CEU samples
 
 vtools select variant --samples "RACE=1" -t CEU
+
 mkdir -p ceu
+
 cd ceu
+
 vtools init ceu --parent ../ --variants CEU --samples "RACE=1" -- build hg19
+
 vtools show project
 
+
 ## Subset data by MAFs
+
 vtools select variant "CEU_mafGD10>=0.05" -t common_ceu 
+
 vtools select v_funct "CEU_mafGD10<0.01" -t rare_ceu
 
 ## Annotate variants to genes
+
 vtools use refGene
 
 # Association testing of common/rare variants
@@ -105,9 +125,32 @@ vtools associate common_ceu BMI --covariate SEX -m "LinRegBurden --alternative 2
 
 # Burden test for rare variants (BRV)
 
+vtools associate rare_ceu BMI --covariate SEX -m "LinRegBurden --alternative 2" -g refGene.name2 -j1 --to_db EA_RV > EA_RV.asso.res
+
 # Variable thresholds test for rare variants (VT)
 
+vtools associate rare_ceu BMI --covariate SEX -m "VariableThresholdsQt --alternative 2 -p 100000 \ --adaptive 0.0005" -g refGene.name2 -j1 --to_db EA_RV > EA_RV_VT.asso.res
+
 # Association analysis of YRI samples
+
+cd ..
+vtools select variant --samples "RACE=0" -t YRI
+mkdir -p yri; cd yri
+vtools init yri --parent ../ --variants YRI --samples "RACE=0" --
+build hg19
+vtools select variant "YRI_mafGD10>=0.05" -t common_yri vtools
+select v_funct "YRI_mafGD10<0.01" -t rare_yri
+vtools use refGene
+vtools associate common_yri BMI --covariate SEX -m "LinRegBurden --alternative 2" -j1 --to_db YA_CV > YA_CV.asso.res vtools associate rare_yri BMI --covariate SEX -m "LinRegBurden --alternative 2" -g refGene.name2 -j1 --to_db YA_RV > YA_RV.asso.res
+vtools associate rare_yri BMI --covariate SEX -m "VariableThresholdsQt --alternative 2 -p 100000 \
+--adaptive 0.0005" -g refGene.name2 -j1 --to_db YA_RV > YA_RV_VT.asso.res
+cd ..
+
+
+# Meta-analysis
+
+vtools_report meta_analysis ceu/EA_RV_VT.asso.res yri/YA_RV_VT.asso.res --beta 5 --pval 6 --se 7 -n 2 --link 1 > ME\ TA_RV_VT.asso.res
+
 
 
 
