@@ -134,17 +134,27 @@ vtools associate rare_ceu BMI --covariate SEX -m "VariableThresholdsQt --alterna
 # Association analysis of YRI samples
 
 cd ..
+
 vtools select variant --samples "RACE=0" -t YRI
+
 mkdir -p yri; cd yri
-vtools init yri --parent ../ --variants YRI --samples "RACE=0" --
-build hg19
+
+vtools init yri --parent ../ --variants YRI --samples "RACE=0" --build hg19
+
 vtools select variant "YRI_mafGD10>=0.05" -t common_yri vtools
+
 select v_funct "YRI_mafGD10<0.01" -t rare_yri
+
 vtools use refGene
-vtools associate common_yri BMI --covariate SEX -m "LinRegBurden --alternative 2" -j1 --to_db YA_CV > YA_CV.asso.res vtools associate rare_yri BMI --covariate SEX -m "LinRegBurden --alternative 2" -g refGene.name2 -j1 --to_db YA_RV > YA_RV.asso.res
+
+vtools associate common_yri BMI --covariate SEX -m "LinRegBurden --alternative 2" -j1 --to_db YA_CV > YA_CV.asso.res
+
+vtools associate rare_yri BMI --covariate SEX -m "LinRegBurden --alternative 2" -g refGene.name2 -j1 --to_db YA_RV > YA_RV.asso.res
+
+
 vtools associate rare_yri BMI --covariate SEX -m "VariableThresholdsQt --alternative 2 -p 100000 \
 --adaptive 0.0005" -g refGene.name2 -j1 --to_db YA_RV > YA_RV_VT.asso.res
-cd ..
+
 
 
 # Meta-analysis
