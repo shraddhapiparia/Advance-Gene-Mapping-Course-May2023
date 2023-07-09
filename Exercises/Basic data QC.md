@@ -122,6 +122,7 @@ Unadj PC1   PC1-2 PC1-3 PC1-4 PC1-5 PC1-6 PC1-7 PC1-8 PC1-9 PC1-10
 
 It is best to include two components in the analysis. Since we are analyzing three unique populations inclusion of PCs did not adequately control for substructure. If you compare the QQ plots below you can see that for this dataset the most significant SNPs were changed minimally when we adjusted for substructure but some of the moderately significant SNPs lambda became less significant after adjustment. However, in some situations the p-values can become smaller.
 
+
 Why would you not want to include in your analysis individuals from different ethnic backgrounds even if you control for population substructure?
 
 
